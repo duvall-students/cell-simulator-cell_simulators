@@ -2,22 +2,37 @@ package model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Grid {
 	
-	private int [][] currentGrid;
+	public int [][] currentGrid;
 	private int [][] nextGrid;
 	private int maximumState = 1;
 	private HashMap <Integer, Function<Integer, Function<Integer, Consumer<Integer>>>> ruleOfLifeMap;
 	private RuleHandler ruleHandler;
+	private final double chanceForBacteria = 0.4;
 
 	public Grid(int width, int height) {
+		
 		this.currentGrid = new int [height][width];
 		this.nextGrid = new int [height][width];
-		this.ruleHandler = new GameOfLifeHandler(this.currentGrid);
 		
+		Random random = new Random();
+		for (int i = 1; i < nextGrid.length - 1; i ++) {
+			for (int j = 1; j < nextGrid[0].length - 1; j ++) {
+				if(random.nextDouble() < chanceForBacteria) {
+					currentGrid[i][j] = 1;
+				} else {
+					currentGrid[i][j] = 0;
+				}
+			}
+		}
+		
+		this.ruleHandler = new GameOfLifeHandler(this.currentGrid, this.nextGrid);
+		this.setNextGrid();
 	}
 	
 	public void step() {
@@ -28,7 +43,7 @@ public class Grid {
 	public void setNextGrid() {
 		for (int i = 1; i < nextGrid.length - 1; i ++) {
 			for (int j = 1; j < nextGrid[0].length - 1; j ++) {
-				ruleHandler.handle(i, j, findNumberOfNeighbors(i, j));
+				ruleHandler.handle(i, j, findNumberOfNeighbors(i, j), this.currentGrid);
 			}
 		}
 	}
@@ -68,20 +83,13 @@ public class Grid {
 	}
 	
 	
-//	/*
-//	 * For Testing
-//	 */
-//	public static void main(String[] args) {
-//		Grid v = new Grid(5, 5);
-//		System.out.println(v.toString());
-//		v.iterateState(2, 1);
-//		System.out.println(v.toString());
-//		v.step();
-//		//v.iterateState(2, 1);
-//		System.out.println(v.toString());
-//		
-//
-//	}
+	/*
+	 * For Testing
+	 */
+	public static void main(String[] args) {
+		
+		
+	}
 	
 
 }
