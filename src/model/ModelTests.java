@@ -4,6 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Test Class for functionality associated with the Model package
+ * @author benpendley
+ *
+ */
 class ModelTests {
 	
 	int[][] testCurrentGrid = {{0,0,0,0,0,0,0,0,0,0,0},
@@ -23,13 +28,14 @@ class ModelTests {
 	String stateAfterStep = "-----------\n-----------\n----***----\n-----------\n--*-----*--\n--*-----*--\n--*-----*--\n-----------\n----***----\n-----------\n-----------\n";
 
 
+	// test that constructor and step method works correctly
 	@Test
 	void test() {
-		assertEquals(g.toString(), startingState);
+		assertEquals(startingState, g.toString());
 		g.step();
-		assertEquals(g.toString(), stateAfterStep);
+		assertEquals(stateAfterStep, g.toString());
 		g.step();
-		assertEquals(g.toString(), startingState);
+		assertEquals(startingState, g.toString());
 	}
 
 }
