@@ -6,20 +6,27 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+
+/**
+ * GameOfLife Handler
+ * @author benpendley
+ *
+ *	Describes the rules need and followed by each cell to play the Game of Life
+ */
 public class GameOfLifeHandler implements RuleHandler{
 	
 	private Map<Integer,BiConsumer<Integer,Integer>> methods;
 
-	public GameOfLifeHandler(int [][] currentGrid, int [][] nextGrid) {
+	public GameOfLifeHandler(int [][] current, int [][] next) {
 		
 		methods = new HashMap<>();
 		
 		BiConsumer<Integer, Integer> becomesOne = (yIndex, xIndex) -> {
-			nextGrid[yIndex][xIndex] = 1;};
+			next[yIndex][xIndex] = 1;};
 		BiConsumer<Integer, Integer> becomesZero = (yIndex, xIndex) -> {
-			nextGrid[yIndex][xIndex] = 0;};
+			next[yIndex][xIndex] = 0;};
 		BiConsumer<Integer, Integer> remainTheSame = (yIndex, xIndex) -> {
-			nextGrid[yIndex][xIndex] = currentGrid[yIndex][xIndex];};
+			next[yIndex][xIndex] = current[yIndex][xIndex];};
 
 		methods.put (0, becomesZero);
 		methods.put (1, becomesZero);
@@ -33,25 +40,11 @@ public class GameOfLifeHandler implements RuleHandler{
 
 	}
 
-	/*
-	 * Does not work
-	 */
+
 	@Override
 	public void handle(int yIndex, int xIndex, int numNeighbors) {
 		this.methods.get(numNeighbors).accept(yIndex, xIndex);
 	}
 	
-	/*
-	 * works correctly
-	 */
-	public void handle(int yIndex, int xIndex, int numNeighbors, int[][] current, int[][] next) {
-		if (numNeighbors == 0 || numNeighbors == 1 || numNeighbors >= 4) {
-			next[yIndex][xIndex] = 0;
-		} else if (numNeighbors == 2) {
-			next[yIndex][xIndex] = current[yIndex][xIndex];
-		} else {
-			next[yIndex][xIndex] = 1;
-		}
-	}
 
 }
