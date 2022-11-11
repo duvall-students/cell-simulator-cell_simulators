@@ -14,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -33,8 +34,8 @@ public class SimulationDisplay extends Application{
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	
 	private final int BLOCK_SIZE = 12;     		// size of each cell
-	private int numRows; 						// number of rows which will be decided by the user
-	private int numColumns;						// number of columns which will be decided by the user
+	private int numRows = 20; 						// number of rows which will be decided by the user
+	private int numColumns = 15;						// number of columns which will be decided by the user
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
@@ -42,7 +43,7 @@ public class SimulationDisplay extends Application{
 	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
 		
-	private Rectangle[][] displayGrid;			// the display 2D rectangle that will get updated and drawn
+	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
 	
 	private GridController simController;		//GridController variable for calling controller functions
 	
@@ -141,14 +142,18 @@ public class SimulationDisplay extends Application{
 		//creating group container
 		Group simulationDrawing = new Group();
 		
-		//Creating displayGrid rectangle object and coloring each square
-		this.displayGrid = new Rectangle[this.numRows][this.numColumns];
+		//Creating displayGrid pane object and coloring each square
+		this.displayGrid = new Pane[this.numRows][this.numColumns];
 		for (int x = 0; x < this.numRows; x++) {
 			for(int y = 0; y < this.numColumns; y++) {
-				Rectangle placeHolderRectangle = new Rectangle(y*this.BLOCK_SIZE, x*this.BLOCK_SIZE, this.BLOCK_SIZE, this.BLOCK_SIZE);
+				//As of right now each pane contains the label X simply because I was experimenting with how to label the boxes
+				Pane placeHolderPane = new StackPane();
+				Rectangle placeHolderRectangle = new Rectangle(this.BLOCK_SIZE, this.BLOCK_SIZE);
 				placeHolderRectangle.setFill(Color.DARKSEAGREEN);
-				this.displayGrid[x][y] = placeHolderRectangle;
-				simulationDrawing.getChildren().add(placeHolderRectangle);
+				placeHolderPane.getChildren().addAll(placeHolderRectangle,new Label("X"));
+				placeHolderPane.relocate(x*this.BLOCK_SIZE, y*this.BLOCK_SIZE);
+				this.displayGrid[x][y] = placeHolderPane;
+				simulationDrawing.getChildren().add(placeHolderPane);
 			}
 		}
 		
