@@ -1,5 +1,6 @@
 package view;
 
+import controller.GridController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -13,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -32,23 +34,25 @@ public class SimulationDisplay extends Application{
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	
 	private final int BLOCK_SIZE = 12;     		// size of each cell
-	private int numRows = 25; 						// number of rows which will be decided by the user
-	private int numColumns = 25;						// number of columns which will be decided by the user
+	private int numRows = 20; 						// number of rows which will be decided by the user
+	private int numColumns = 15;						// number of columns which will be decided by the user
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
 	private Button pauseButton;					// JavaFx button variable for the pause functionality
 	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
-	
-	private Rectangle[][] displayGrid;			// the display 2D rectangle that will get updated and drawn
-	
-	//will need controller instance variable HERE
 		
+	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
+	
+	private GridController simController;		//GridController variable for calling controller functions
+	
+	
 	//Start of JavaFX Application
 	public void start(Stage stage) {
 		
-		//will likely create controller variable here
+		//Initializing Controller Variable
+		this.simController = new GridController(this.numColumns, this.numRows, this);
 		
 		
 		//initializing GUI begins here
@@ -117,12 +121,12 @@ public class SimulationDisplay extends Application{
 		Button newSimulationButton = new Button("New Simulation");
 		newSimulationButton.setOnAction(value -> this.numColumns = Integer.valueOf(this.numberOfColumns.getText()));
 		newSimulationButton.setOnAction(value -> this.numRows = Integer.valueOf(this.numberOfRows.getText()));
-		newSimulationButton.setOnAction(value -> {/*function call to controller for new maze*/});
+		newSimulationButton.setOnAction(value -> {/*May need to make new function for this*/});
 		buttons.getChildren().add(newSimulationButton);
 		
 		//take a single step button creation
 		Button singleStepButton = new Button("Take a Step");
-		singleStepButton.setOnAction(value -> {/*function call to controller to do one step*/});
+		singleStepButton.setOnAction(value -> {this.simController.step();});
 		buttons.getChildren().add(singleStepButton);
 		
 		//pause/un-pause the simulation button creation
@@ -138,14 +142,18 @@ public class SimulationDisplay extends Application{
 		//creating group container
 		Group simulationDrawing = new Group();
 		
-		//Creating displayGrid rectangle object and coloring each square
-		this.displayGrid = new Rectangle[this.numRows][this.numColumns];
+		//Creating displayGrid pane object and coloring each square
+		this.displayGrid = new Pane[this.numRows][this.numColumns];
 		for (int x = 0; x < this.numRows; x++) {
 			for(int y = 0; y < this.numColumns; y++) {
-				Rectangle placeHolderRectangle = new Rectangle(y*this.BLOCK_SIZE, x*this.BLOCK_SIZE, this.BLOCK_SIZE, this.BLOCK_SIZE);
+				//As of right now each pane contains the label X simply because I was experimenting with how to label the boxes
+				Pane placeHolderPane = new StackPane();
+				Rectangle placeHolderRectangle = new Rectangle(this.BLOCK_SIZE, this.BLOCK_SIZE);
 				placeHolderRectangle.setFill(Color.DARKSEAGREEN);
-				this.displayGrid[x][y] = placeHolderRectangle;
-				simulationDrawing.getChildren().add(placeHolderRectangle);
+				placeHolderPane.getChildren().addAll(placeHolderRectangle,new Label("X"));
+				placeHolderPane.relocate(x*this.BLOCK_SIZE, y*this.BLOCK_SIZE);
+				this.displayGrid[x][y] = placeHolderPane;
+				simulationDrawing.getChildren().add(placeHolderPane);
 			}
 		}
 		
@@ -168,6 +176,7 @@ public class SimulationDisplay extends Application{
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
 				//add functionality here for adding or removing the x from the square based on update
+//				this.displayGrid[x][y].
 			}
 		}
 	}
@@ -175,7 +184,7 @@ public class SimulationDisplay extends Application{
 	//Step method that performs a step call every frame unless paused is true
 	public void step(double elapsedTime) {
 		if(!paused) {
-			//call a step method in controller when it is created
+			this.simController.step();
 		}
 	}
 	
