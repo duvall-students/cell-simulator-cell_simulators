@@ -1,5 +1,6 @@
 package view;
 
+import controller.GridController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -32,23 +33,25 @@ public class SimulationDisplay extends Application{
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	
 	private final int BLOCK_SIZE = 12;     		// size of each cell
-	private int numRows = 25; 						// number of rows which will be decided by the user
-	private int numColumns = 25;						// number of columns which will be decided by the user
+	private int numRows; 						// number of rows which will be decided by the user
+	private int numColumns;						// number of columns which will be decided by the user
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
 	private Button pauseButton;					// JavaFx button variable for the pause functionality
 	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
-	
+		
 	private Rectangle[][] displayGrid;			// the display 2D rectangle that will get updated and drawn
 	
-	//will need controller instance variable HERE
-		
+	private GridController simController;		//GridController variable for calling controller functions
+	
+	
 	//Start of JavaFX Application
 	public void start(Stage stage) {
 		
-		//will likely create controller variable here
+		//Initializing Controller Variable
+		this.simController = new GridController(this.numColumns, this.numRows, this);
 		
 		
 		//initializing GUI begins here
@@ -117,12 +120,12 @@ public class SimulationDisplay extends Application{
 		Button newSimulationButton = new Button("New Simulation");
 		newSimulationButton.setOnAction(value -> this.numColumns = Integer.valueOf(this.numberOfColumns.getText()));
 		newSimulationButton.setOnAction(value -> this.numRows = Integer.valueOf(this.numberOfRows.getText()));
-		newSimulationButton.setOnAction(value -> {/*function call to controller for new maze*/});
+		newSimulationButton.setOnAction(value -> {/*May need to make new function for this*/});
 		buttons.getChildren().add(newSimulationButton);
 		
 		//take a single step button creation
 		Button singleStepButton = new Button("Take a Step");
-		singleStepButton.setOnAction(value -> {/*function call to controller to do one step*/});
+		singleStepButton.setOnAction(value -> {this.simController.step();});
 		buttons.getChildren().add(singleStepButton);
 		
 		//pause/un-pause the simulation button creation
@@ -168,6 +171,7 @@ public class SimulationDisplay extends Application{
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
 				//add functionality here for adding or removing the x from the square based on update
+//				this.displayGrid[x][y].
 			}
 		}
 	}
@@ -175,7 +179,7 @@ public class SimulationDisplay extends Application{
 	//Step method that performs a step call every frame unless paused is true
 	public void step(double elapsedTime) {
 		if(!paused) {
-			//call a step method in controller when it is created
+			this.simController.step();
 		}
 	}
 	
