@@ -1,5 +1,7 @@
 package view;
 
+import java.util.HashMap;
+
 import controller.GridController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -28,24 +30,23 @@ import javafx.scene.control.TextField;
  */
 public class SimulationDisplay extends Application{
  
-	private final int MILLISECOND_DELAY = 500;	// animation speed for simulation (rate of refresh)
+	private final int MILLISECOND_DELAY = 5000;	// animation speed for simulation (rate of refresh)
 	
 	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	
 	private final int BLOCK_SIZE = 15;     		// size of each cell
-	private int numRows = 20; 						// number of rows which will be decided by the user
-	private int numColumns = 15;						// number of columns which will be decided by the user
+	private int numRows = 10; 						// number of rows which will be decided by the user
+	private int numColumns = 10;						// number of columns which will be decided by the user
 	private final int BACTERIA_PRESENT = 1;		// final instance variable for boolean checks if bacteria is present
+	private final int LABEL_INDEX = 1;			// index value for label in children list
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
 	private Button pauseButton;					// JavaFx button variable for the pause functionality
 	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
-	
-	private final Label BACTERIA_LABEL = new Label("x"); // final instance variable for label that is used if bacteria is present
-		
+			
 	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
 	
 	private GridController simController;		//GridController variable for calling controller functions
@@ -178,10 +179,17 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
+				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
 				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
-				this.displayGrid[x][y].getChildren().remove(this.BACTERIA_LABEL);
 				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
-					this.displayGrid[x][y].getChildren().add(BACTERIA_LABEL);
+					this.displayGrid[x][y].getChildren().add(new Label("x"));
+					System.out.println("Added label");
+				}
+				else {
+					if (this.displayGrid[x][y].getChildren().size() > 1) {
+						this.displayGrid[x][y].getChildren().remove(this.LABEL_INDEX);
+						System.out.println("Removed label");
+					}
 				}
 			}
 		}
