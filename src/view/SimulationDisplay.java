@@ -27,7 +27,7 @@ import javafx.scene.control.TextField;
  * This is the display class that contains all necessary JavaFX information in order to display the simulation
  */
 public class SimulationDisplay extends Application{
-
+ 
 	private final int MILLISECOND_DELAY = 500;	// animation speed for simulation (rate of refresh)
 	
 	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
