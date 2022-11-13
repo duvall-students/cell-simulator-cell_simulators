@@ -27,21 +27,24 @@ import javafx.scene.control.TextField;
  * This is the display class that contains all necessary JavaFX information in order to display the simulation
  */
 public class SimulationDisplay extends Application{
-
-	private final int MILLISECOND_DELAY = 15;	// animation speed for simulation (rate of refresh)
+ 
+	private final int MILLISECOND_DELAY = 500;	// animation speed for simulation (rate of refresh)
 	
 	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	
-	private final int BLOCK_SIZE = 12;     		// size of each cell
+	private final int BLOCK_SIZE = 15;     		// size of each cell
 	private int numRows = 20; 						// number of rows which will be decided by the user
 	private int numColumns = 15;						// number of columns which will be decided by the user
+	private final int BACTERIA_PRESENT = 1;		// final instance variable for boolean checks if bacteria is present
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
 	private Button pauseButton;					// JavaFx button variable for the pause functionality
 	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
+	
+	private final Label BACTERIA_LABEL = new Label("x"); // final instance variable for label that is used if bacteria is present
 		
 	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
 	
@@ -98,8 +101,8 @@ public class SimulationDisplay extends Application{
 		GridPane root = new GridPane();
 		
 		//Create necessary label variables
-		root.add(new Label("Columns"),0,0);
-		root.add(new Label("Rows"), 0,1);
+		root.add(new Label("Columns: "),0,0);
+		root.add(new Label("Rows: "), 0,1);
 		
 		//Create textfield variables and add to gridpane
 		this.numberOfColumns = new TextField();
@@ -146,11 +149,11 @@ public class SimulationDisplay extends Application{
 		this.displayGrid = new Pane[this.numRows][this.numColumns];
 		for (int x = 0; x < this.numRows; x++) {
 			for(int y = 0; y < this.numColumns; y++) {
-				//As of right now each pane contains the label X simply because I was experimenting with how to label the boxes
+				//Create each individual pane object and add to the drawing/displayGrid
 				Pane placeHolderPane = new StackPane();
 				Rectangle placeHolderRectangle = new Rectangle(this.BLOCK_SIZE, this.BLOCK_SIZE);
 				placeHolderRectangle.setFill(Color.DARKSEAGREEN);
-				placeHolderPane.getChildren().addAll(placeHolderRectangle,new Label("X"));
+				placeHolderPane.getChildren().addAll(placeHolderRectangle);
 				placeHolderPane.relocate(x*this.BLOCK_SIZE, y*this.BLOCK_SIZE);
 				this.displayGrid[x][y] = placeHolderPane;
 				simulationDrawing.getChildren().add(placeHolderPane);
@@ -175,8 +178,11 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
-				//add functionality here for adding or removing the x from the square based on update
-//				this.displayGrid[x][y].
+				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
+				this.displayGrid[x][y].getChildren().remove(this.BACTERIA_LABEL);
+				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
+					this.displayGrid[x][y].getChildren().add(BACTERIA_LABEL);
+				}
 			}
 		}
 	}
