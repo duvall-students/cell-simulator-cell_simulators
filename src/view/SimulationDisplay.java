@@ -1,5 +1,8 @@
 package view;
 
+import java.util.HashMap;
+
+import controller.GridController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -10,10 +13,15 @@ import javafx.util.Duration;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.control.TextField;
 
 
 /*
@@ -21,30 +29,34 @@ import javafx.scene.shape.Rectangle;
  * This is the display class that contains all necessary JavaFX information in order to display the simulation
  */
 public class SimulationDisplay extends Application{
-
-	private final int MILLISECOND_DELAY = 15;	// animation speed for simulation (rate of refresh)
+ 
+	private final int MILLISECOND_DELAY = 5000;	// animation speed for simulation (rate of refresh)
 	
 	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	
-	private final int BLOCK_SIZE = 12;     		// size of each cell
-	private int numRows; 						// number of rows which will be decided by the user
-	private int numColumns;						// number of columns which will be decided by the user
+	private final int BLOCK_SIZE = 15;     		// size of each cell
+	private int numRows = 10; 						// number of rows which will be decided by the user
+	private int numColumns = 10;						// number of columns which will be decided by the user
+	private final int BACTERIA_PRESENT = 1;		// final instance variable for boolean checks if bacteria is present
+	private final int LABEL_INDEX = 1;			// index value for label in children list
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
 	private Button pauseButton;					// JavaFx button variable for the pause functionality
-
-	private Rectangle[][] displayGrid;			// the display 2D rectangle that will get updated and drawn
+	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
+	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
+			
+	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
 	
-	//will need controller instance variable HERE
+	private GridController simController;		//GridController variable for calling controller functions
 	
-	//NEED INPUT HANDLER CLASS AS WELL CREATE VARIABLE HERE
 	
 	//Start of JavaFX Application
 	public void start(Stage stage) {
 		
-		//will likely create controller variable here
+		//Initializing Controller Variable
+		this.simController = new GridController(this.numColumns, this.numRows, this);
 		
 		
 		//initializing GUI begins here
@@ -52,6 +64,7 @@ public class SimulationDisplay extends Application{
 		stage.setScene(simulationScene);
 		stage.setTitle("Game of Life");
 		stage.show();
+		
 		
 		//Performs the animation, will call the step method for each frame
 		KeyFrame frame = new KeyFrame(Duration.millis(this.MILLISECOND_DELAY), e -> this.step(this.MILLISECOND_DELAY));
@@ -68,17 +81,37 @@ public class SimulationDisplay extends Application{
 		Group simulationDrawing = setupSimulation();
 		HBox controlButtons = setupButtons();
 		
+		GridPane textInputs = setupTextInputs();
+		
 		//creating root for scene and adding containers
 		VBox root = new VBox();
 		root.setAlignment(Pos.TOP_CENTER);
 		root.setSpacing(10);
 		root.setPadding(new Insets(10,10,10,10));
-		root.getChildren().addAll(simulationDrawing,controlButtons);
+		root.getChildren().addAll(simulationDrawing,controlButtons,textInputs);
 		
 		//creating scene variable with root and sizing instance variables 
 		Scene scene = new Scene(root, this.numColumns*this.BLOCK_SIZE+this.EXTRA_HORIZONTAL, this.numRows*this.BLOCK_SIZE+this.EXTRA_VERTICAL, Color.BLANCHEDALMOND);
 		
 		return scene;
+	}
+	
+	//Method used to get input using TextField
+	private GridPane setupTextInputs() {
+		//GridPane to contain and format all that is needed
+		GridPane root = new GridPane();
+		
+		//Create necessary label variables
+		root.add(new Label("Columns: "),0,0);
+		root.add(new Label("Rows: "), 0,1);
+		
+		//Create textfield variables and add to gridpane
+		this.numberOfColumns = new TextField();
+		this.numberOfRows = new TextField();
+		root.add(numberOfRows, 1,0);
+		root.add(numberOfColumns,1,1);
+		return root;
+		
 	}
 	
 	//creating and setting up buttons here
@@ -90,12 +123,14 @@ public class SimulationDisplay extends Application{
 		
 		//start a new simulation button creation
 		Button newSimulationButton = new Button("New Simulation");
-		newSimulationButton.setOnAction(value -> {/*function call to controller for new maze*/});
+		newSimulationButton.setOnAction(value -> this.numColumns = Integer.valueOf(this.numberOfColumns.getText()));
+		newSimulationButton.setOnAction(value -> this.numRows = Integer.valueOf(this.numberOfRows.getText()));
+		newSimulationButton.setOnAction(value -> {/*May need to make new function for this*/});
 		buttons.getChildren().add(newSimulationButton);
 		
 		//take a single step button creation
 		Button singleStepButton = new Button("Take a Step");
-		singleStepButton.setOnAction(value -> {/*function call to controller to do one step*/});
+		singleStepButton.setOnAction(value -> {this.simController.step();});
 		buttons.getChildren().add(singleStepButton);
 		
 		//pause/un-pause the simulation button creation
@@ -111,14 +146,18 @@ public class SimulationDisplay extends Application{
 		//creating group container
 		Group simulationDrawing = new Group();
 		
-		//Creating displayGrid rectangle object and coloring each square
-		this.displayGrid = new Rectangle[this.numRows][this.numColumns];
+		//Creating displayGrid pane object and coloring each square
+		this.displayGrid = new Pane[this.numRows][this.numColumns];
 		for (int x = 0; x < this.numRows; x++) {
 			for(int y = 0; y < this.numColumns; y++) {
-				Rectangle placeHolderRectangle = new Rectangle(y*this.BLOCK_SIZE, x*this.BLOCK_SIZE, this.BLOCK_SIZE, this.BLOCK_SIZE);
+				//Create each individual pane object and add to the drawing/displayGrid
+				Pane placeHolderPane = new StackPane();
+				Rectangle placeHolderRectangle = new Rectangle(this.BLOCK_SIZE, this.BLOCK_SIZE);
 				placeHolderRectangle.setFill(Color.DARKSEAGREEN);
-				this.displayGrid[x][y] = placeHolderRectangle;
-				simulationDrawing.getChildren().add(placeHolderRectangle);
+				placeHolderPane.getChildren().addAll(placeHolderRectangle);
+				placeHolderPane.relocate(x*this.BLOCK_SIZE, y*this.BLOCK_SIZE);
+				this.displayGrid[x][y] = placeHolderPane;
+				simulationDrawing.getChildren().add(placeHolderPane);
 			}
 		}
 		
@@ -140,7 +179,18 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
-				//add functionality here for adding or removing the x from the square based on update
+				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
+				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
+				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
+					this.displayGrid[x][y].getChildren().add(new Label("x"));
+					System.out.println("Added label");
+				}
+				else {
+					if (this.displayGrid[x][y].getChildren().size() > 1) {
+						this.displayGrid[x][y].getChildren().remove(this.LABEL_INDEX);
+						System.out.println("Removed label");
+					}
+				}
 			}
 		}
 	}
@@ -148,7 +198,7 @@ public class SimulationDisplay extends Application{
 	//Step method that performs a step call every frame unless paused is true
 	public void step(double elapsedTime) {
 		if(!paused) {
-			//call a step method in controller when it is created
+			this.simController.step();
 		}
 	}
 	
