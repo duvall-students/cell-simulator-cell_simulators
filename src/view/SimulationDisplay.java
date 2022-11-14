@@ -28,18 +28,17 @@ import javafx.scene.control.TextField;
  */
 public class SimulationDisplay extends Application{
  
-	private final int MILLISECOND_DELAY = 500;	// animation speed for simulation (rate of refresh)
+	private final int MILLISECOND_DELAY = 5000;	// animation speed for simulation (rate of refresh)
 	
 //	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
 //	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	private final int BASE_SCENE_WIDTH = 300;	// Default display width
 	private final int BASE_SCENE_HEIGHT = 300;  // Default display height
 	
-	private final int BLOCK_SIZE = 15;     		// size of each cell
+	private int blockSize = 15;     		// size of each cell
 	private int numRows; 						// number of rows which will be decided by the user
 	private int numColumns;						// number of columns which will be decided by the user
 	private final int BACTERIA_PRESENT = 1;		// final instance variable for boolean checks if bacteria is present
-	private final int LABEL_INDEX = 1;			// index value for label in children list
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
@@ -152,6 +151,7 @@ public class SimulationDisplay extends Application{
 	private void setupSimulation() {
 		//creating group container
 		this.simulationDrawing.getChildren().clear();
+		this.simulationDrawing.getChildren().add(new Rectangle(this.blockSize*this.numColumns, this.blockSize*this.numRows, Color.DARKSEAGREEN));
 		
 		//Creating displayGrid pane object and coloring each square
 		this.displayGrid = new Pane[this.numRows][this.numColumns];
@@ -159,10 +159,7 @@ public class SimulationDisplay extends Application{
 			for(int y = 0; y < this.numColumns; y++) {
 				//Create each individual pane object and add to the drawing/displayGrid
 				Pane placeHolderPane = new StackPane();
-				Rectangle placeHolderRectangle = new Rectangle(this.BLOCK_SIZE, this.BLOCK_SIZE);
-				placeHolderRectangle.setFill(Color.DARKSEAGREEN);
-				placeHolderPane.getChildren().addAll(placeHolderRectangle);
-				placeHolderPane.relocate(x*this.BLOCK_SIZE, y*this.BLOCK_SIZE);
+				placeHolderPane.relocate(x*this.blockSize, y*this.blockSize);
 				this.displayGrid[x][y] = placeHolderPane;
 				simulationDrawing.getChildren().add(placeHolderPane);
 			}
@@ -184,14 +181,13 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
+				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
 				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
+				if (this.displayGrid[x][y].getChildren().size() > 0) {
+					this.displayGrid[x][y].getChildren().clear();
+				}
 				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
 					this.displayGrid[x][y].getChildren().add(new Label("x"));
-				}
-				else {
-					if (this.displayGrid[x][y].getChildren().size() > 1) {
-						this.displayGrid[x][y].getChildren().remove(this.LABEL_INDEX);
-					}
 				}
 			}
 		}
