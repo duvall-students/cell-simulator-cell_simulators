@@ -1,7 +1,7 @@
 package view;
 
 import java.util.HashMap;
-
+import java.lang.Math.*;
 import controller.GridController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -30,14 +30,16 @@ import javafx.scene.control.TextField;
  */
 public class SimulationDisplay extends Application{
  
-	private final int MILLISECOND_DELAY = 5000;	// animation speed for simulation (rate of refresh)
+	private final int MILLISECOND_DELAY = 500;	// animation speed for simulation (rate of refresh)
 	
 	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
 	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
+	private final int BASE_SCENE_WIDTH = 300;	// Default display width
+	private final int BASE_SCENE_HEIGHT = 300;  // Default display height
 	
 	private final int BLOCK_SIZE = 15;     		// size of each cell
-	private int numRows = 10; 						// number of rows which will be decided by the user
-	private int numColumns = 10;						// number of columns which will be decided by the user
+	private int numRows; 						// number of rows which will be decided by the user
+	private int numColumns;						// number of columns which will be decided by the user
 	private final int BACTERIA_PRESENT = 1;		// final instance variable for boolean checks if bacteria is present
 	private final int LABEL_INDEX = 1;			// index value for label in children list
 
@@ -46,10 +48,11 @@ public class SimulationDisplay extends Application{
 	private Button pauseButton;					// JavaFx button variable for the pause functionality
 	private TextField numberOfColumns;			// JavaFX textfield variable to get desired number of columns
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
+	private Group simulationDrawing;			// Group instance variable that contains the displayed simulation
 			
 	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
 	
-	private GridController simController;		//GridController variable for calling controller functions
+	private GridController simController;		// GridController variable for calling controller functions	
 	
 	
 	//Start of JavaFX Application
@@ -59,8 +62,8 @@ public class SimulationDisplay extends Application{
 		this.simController = new GridController(this.numColumns, this.numRows, this);
 		
 		
-		//initializing GUI begins here
-		simulationScene = setupScene();
+		//initializing Scene and GUI begins here
+		setupScene();
 		stage.setScene(simulationScene);
 		stage.setTitle("Game of Life");
 		stage.show();
@@ -75,12 +78,13 @@ public class SimulationDisplay extends Application{
 		
 	}
 	
+	
 	//Creating scene with simulation area and buttons for control
-	private Scene setupScene() {
+	private void setupScene() {
 		//Making containers for drawing and buttons
-		Group simulationDrawing = setupSimulation();
+		simulationDrawing = new Group();
+		setupSimulation();
 		HBox controlButtons = setupButtons();
-		
 		GridPane textInputs = setupTextInputs();
 		
 		//creating root for scene and adding containers
@@ -88,12 +92,11 @@ public class SimulationDisplay extends Application{
 		root.setAlignment(Pos.TOP_CENTER);
 		root.setSpacing(10);
 		root.setPadding(new Insets(10,10,10,10));
-		root.getChildren().addAll(simulationDrawing,controlButtons,textInputs);
+		root.getChildren().addAll(this.simulationDrawing,controlButtons,textInputs);
 		
 		//creating scene variable with root and sizing instance variables 
-		Scene scene = new Scene(root, this.numColumns*this.BLOCK_SIZE+this.EXTRA_HORIZONTAL, this.numRows*this.BLOCK_SIZE+this.EXTRA_VERTICAL, Color.BLANCHEDALMOND);
+		this.simulationScene = new Scene(root, this.BASE_SCENE_WIDTH, this.BASE_SCENE_HEIGHT, Color.BLANCHEDALMOND);
 		
-		return scene;
 	}
 	
 	//Method used to get input using TextField
@@ -123,9 +126,7 @@ public class SimulationDisplay extends Application{
 		
 		//start a new simulation button creation
 		Button newSimulationButton = new Button("New Simulation");
-		newSimulationButton.setOnAction(value -> this.numColumns = Integer.valueOf(this.numberOfColumns.getText()));
-		newSimulationButton.setOnAction(value -> this.numRows = Integer.valueOf(this.numberOfRows.getText()));
-		newSimulationButton.setOnAction(value -> {/*May need to make new function for this*/});
+		newSimulationButton.setOnAction(value -> {this.newSimulation();});
 		buttons.getChildren().add(newSimulationButton);
 		
 		//take a single step button creation
@@ -141,10 +142,18 @@ public class SimulationDisplay extends Application{
 		return buttons;
 	}
 	
+	//Method that performs the actions necessary for newSimulation button
+	private void newSimulation() {
+		this.numColumns = Integer.valueOf(this.numberOfColumns.getText());
+		this.numRows = Integer.valueOf(this.numberOfRows.getText());
+		this.simController.newGridCreator(this.numColumns, this.numRows);
+		this.setupSimulation();
+	}
+	
 	//setup visualization of simulation so it can be drawn
-	private Group setupSimulation() {
+	private void setupSimulation() {
 		//creating group container
-		Group simulationDrawing = new Group();
+		this.simulationDrawing.getChildren().clear();
 		
 		//Creating displayGrid pane object and coloring each square
 		this.displayGrid = new Pane[this.numRows][this.numColumns];
@@ -160,10 +169,8 @@ public class SimulationDisplay extends Application{
 				simulationDrawing.getChildren().add(placeHolderPane);
 			}
 		}
-		
-		return simulationDrawing;
 	}
-	
+		
 	//Function that flips paused boolean and changes the text on the pauseButton accordingly
 	private void pauseSimulation() {
 		this.paused = !this.paused;
@@ -179,16 +186,13 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
-				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
 				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
 				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
 					this.displayGrid[x][y].getChildren().add(new Label("x"));
-					System.out.println("Added label");
 				}
 				else {
 					if (this.displayGrid[x][y].getChildren().size() > 1) {
 						this.displayGrid[x][y].getChildren().remove(this.LABEL_INDEX);
-						System.out.println("Removed label");
 					}
 				}
 			}
