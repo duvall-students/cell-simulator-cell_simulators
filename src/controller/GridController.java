@@ -22,5 +22,9 @@ public class GridController {
 		simDisplay.redrawSimulation();
 	}
 	
+	public void newGridCreator(int width, int height) {
+		 this.grid = new Grid(width,height);
+	}
+	
 	
 }
