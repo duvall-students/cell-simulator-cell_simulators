@@ -1,7 +1,5 @@
 package view;
 
-import java.util.HashMap;
-import java.lang.Math.*;
 import controller.GridController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -32,8 +30,8 @@ public class SimulationDisplay extends Application{
  
 	private final int MILLISECOND_DELAY = 500;	// animation speed for simulation (rate of refresh)
 	
-	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
-	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
+//	private final int EXTRA_VERTICAL = 100; 	// Display area allowance when making the scene width
+//	private final int EXTRA_HORIZONTAL = 150; 	// Display area allowance when making the scene width
 	private final int BASE_SCENE_WIDTH = 300;	// Default display width
 	private final int BASE_SCENE_HEIGHT = 300;  // Default display height
 	
