@@ -151,7 +151,7 @@ public class SimulationDisplay extends Application{
 	private void setupSimulation() {
 		//creating group container
 		this.simulationDrawing.getChildren().clear();
-		this.simulationDrawing.getChildren().add(new Rectangle(this.blockSize*this.numColumns, this.blockSize*this.numRows, Color.BLACK));
+		this.simulationDrawing.getChildren().add(new Rectangle(this.blockSize*this.numRows, this.blockSize*this.numColumns, Color.BLACK));
 		
 		//Creating displayGrid pane object and coloring each square
 		this.displayGrid = new StackPane[this.numRows][this.numColumns];
@@ -187,6 +187,7 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
+				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
 				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
 				if (this.displayGrid[x][y].getChildren().size() > 0) {
 					this.displayGrid[x][y].getChildren().clear();
