@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.TextField;
 
-
+ 
 /*
  * Created by Ethan Jeffries
  * This is the display class that contains all necessary JavaFX information in order to display the simulation
