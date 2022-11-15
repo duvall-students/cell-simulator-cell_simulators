@@ -14,14 +14,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.control.TextField;
 
-
+ 
 /*
  * Created by Ethan Jeffries
  * This is the display class that contains all necessary JavaFX information in order to display the simulation
@@ -35,11 +34,11 @@ public class SimulationDisplay extends Application{
 	private final int BASE_SCENE_WIDTH = 300;	// Default display width
 	private final int BASE_SCENE_HEIGHT = 300;  // Default display height
 	
-	private final int BLOCK_SIZE = 15;     		// size of each cell
+	private int blockSize = 15;     			// size of each cell
+	private int miniBlockSize = 13;				// size of smaller block within cell (for visual purposes)
 	private int numRows; 						// number of rows which will be decided by the user
 	private int numColumns;						// number of columns which will be decided by the user
 	private final int BACTERIA_PRESENT = 1;		// final instance variable for boolean checks if bacteria is present
-	private final int LABEL_INDEX = 1;			// index value for label in children list
 
 	private Scene simulationScene;				// the container for the simulation
 	private boolean paused = false;				// boolean value for if simulation is paused or not true=paused simulation
@@ -48,7 +47,7 @@ public class SimulationDisplay extends Application{
 	private TextField numberOfRows;				// JavaFX textfield variable to get desired number of rows
 	private Group simulationDrawing;			// Group instance variable that contains the displayed simulation
 			
-	private Pane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
+	private StackPane[][] displayGrid;				// 2d Pane object in order to display the simulation properly
 	
 	private GridController simController;		// GridController variable for calling controller functions	
 	
@@ -152,17 +151,21 @@ public class SimulationDisplay extends Application{
 	private void setupSimulation() {
 		//creating group container
 		this.simulationDrawing.getChildren().clear();
+		this.simulationDrawing.getChildren().add(new Rectangle(this.blockSize*this.numRows, this.blockSize*this.numColumns, Color.BLACK));
 		
 		//Creating displayGrid pane object and coloring each square
-		this.displayGrid = new Pane[this.numRows][this.numColumns];
+		this.displayGrid = new StackPane[this.numRows][this.numColumns];
 		for (int x = 0; x < this.numRows; x++) {
 			for(int y = 0; y < this.numColumns; y++) {
-				//Create each individual pane object and add to the drawing/displayGrid
-				Pane placeHolderPane = new StackPane();
-				Rectangle placeHolderRectangle = new Rectangle(this.BLOCK_SIZE, this.BLOCK_SIZE);
+				//Adding colored rectangle for visual purposes
+				double innerBoxOffset = (((this.blockSize-this.miniBlockSize)/2));
+				Rectangle placeHolderRectangle = new Rectangle(x*this.blockSize+innerBoxOffset, y*this.blockSize+innerBoxOffset, this.miniBlockSize, this.miniBlockSize);
 				placeHolderRectangle.setFill(Color.DARKSEAGREEN);
-				placeHolderPane.getChildren().addAll(placeHolderRectangle);
-				placeHolderPane.relocate(x*this.BLOCK_SIZE, y*this.BLOCK_SIZE);
+				this.simulationDrawing.getChildren().add(placeHolderRectangle);
+				
+				//Create each individual pane object and add to the drawing/displayGrid
+				StackPane placeHolderPane = new StackPane();
+				placeHolderPane.relocate(x*this.blockSize+innerBoxOffset*4.5, y*this.blockSize-innerBoxOffset*3.5);
 				this.displayGrid[x][y] = placeHolderPane;
 				simulationDrawing.getChildren().add(placeHolderPane);
 			}
@@ -184,14 +187,13 @@ public class SimulationDisplay extends Application{
 	public void redrawSimulation() {
 		for(int x = 0; x < this.displayGrid.length; x++) {
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
+				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
 				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
+				if (this.displayGrid[x][y].getChildren().size() > 0) {
+					this.displayGrid[x][y].getChildren().clear();
+				}
 				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
 					this.displayGrid[x][y].getChildren().add(new Label("x"));
-				}
-				else {
-					if (this.displayGrid[x][y].getChildren().size() > 1) {
-						this.displayGrid[x][y].getChildren().remove(this.LABEL_INDEX);
-					}
 				}
 			}
 		}
