@@ -189,9 +189,8 @@ public class SimulationDisplay extends Application{
 			for(int y = 0; y < this.displayGrid[x].length; y++) {
 				System.out.println(Integer.toString(this.simController.getState(y, x)) + " -> " + Integer.toString(x) + " " + Integer.toString(y));
 				//Iterates through each cell and removes the label no matter what then if there is a bacteria present (getState(x,y) returns 1) adds the label
-				if (this.displayGrid[x][y].getChildren().size() > 0) {
-					this.displayGrid[x][y].getChildren().clear();
-				}
+				this.displayGrid[x][y].getChildren().clear();
+				
 				if (this.simController.getState(y, x)==this.BACTERIA_PRESENT) {
 					this.displayGrid[x][y].getChildren().add(new Label("x"));
 				}
